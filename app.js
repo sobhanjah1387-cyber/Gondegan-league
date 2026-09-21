@@ -9,7 +9,7 @@ var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){r
 var mk=function(k){return {get:function(x){try{return window[k].getItem(x)}catch(e){return null}},set:function(x,v){try{window[k].setItem(x,v)}catch(e){}},del:function(x){try{window[k].removeItem(x)}catch(e){}}}};
 var ls=mk('localStorage'),ss=mk('sessionStorage');
 
-var IMG={h1:'img/h1.jpg',h2:'img/h2.jpg',about:'img/about.jpg'};
+var IMG={h1:'h1.jpg',h2:'h2.jpg',about:'about.jpg'};
 var DEFAULT={"v": 1, "rev": 1, "punish": "تیم بازنده در پایان فصل باید برای همه بستنی بخرد 🍦", "players": [{"id": "tg1", "t": "tg", "name": "بازیکن 1"}, {"id": "tg2", "t": "tg", "name": "بازیکن 2"}, {"id": "tg3", "t": "tg", "name": "بازیکن 3"}, {"id": "tg4", "t": "tg", "name": "بازیکن 4"}, {"id": "tg5", "t": "tg", "name": "بازیکن 5"}, {"id": "hs1", "t": "hs", "name": "بازیکن 1"}, {"id": "hs2", "t": "hs", "name": "بازیکن 2"}, {"id": "hs3", "t": "hs", "name": "بازیکن 3"}, {"id": "hs4", "t": "hs", "name": "بازیکن 4"}, {"id": "hs5", "t": "hs", "name": "بازیکن 5"}], "matches": [{"id": "m1", "week": 1, "date": "", "res": null}], "ms": {}, "mvp": {}, "news": []};
 var S=JSON.parse(JSON.stringify(DEFAULT));
 var TN={tg:'توپ گستران',hs:'سلامت‌جویان'};
