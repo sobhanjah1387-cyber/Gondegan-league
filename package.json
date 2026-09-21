@@ -1,0 +1,7 @@
+{
+  "name": "gondegan-league",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gondegan League - futsal league table, stats, lineup and news",
+  "engines": { "node": ">=18" }
+}
