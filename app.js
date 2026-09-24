@@ -96,7 +96,12 @@ function tbl(){
 /* ---------- views ---------- */
 function vLeague(){
   var rows=tbl(),R=rows.R;
-  var nm=nextMatch(),hero=nm?('<div class="card glass hero-next" id="heroNext"'+(nm.poster?' style="background-image:url(\''+nm.poster+'\')"':'')+'><div class="hn-ov"><span class="wk">هفته '+nm.week+'</span><h2>'+TN.tg+' <small>vs</small> '+TN.hs+'</h2><div class="cd" id="cdTxt">—</div></div></div>'):'';
+  var nm=nextMatch(),hero='';
+  if(nm&&nm.poster){
+    hero='<button class="card glass hero-next has-poster" id="heroNext" data-act="editMatch" data-id="'+nm.id+'" aria-label="ویرایش این بازی"><img class="hn-img" src="'+nm.poster+'" alt=""><span class="hn-chip"><b class="wk">هفته '+nm.week+'</b><span class="cd" id="cdTxt">—</span></span></button>';
+  }else if(nm){
+    hero='<button class="card glass hero-next" id="heroNext" data-act="editMatch" data-id="'+nm.id+'" aria-label="ویرایش این بازی"><div class="hn-ov"><span class="wk">هفته '+nm.week+'</span><h2>'+TN.tg+' <small>vs</small> '+TN.hs+'</h2><div class="cd" id="cdTxt">—</div></div></button>';
+  }
   var adm=ADMIN?'<div class="bar"><button class="btn pri" data-act="newMatch">＋ ثبت نتیجه بازی</button><button class="btn dng" data-act="resetTable">ریست جدول</button></div>':'';
   var trs=rows.map(function(r,i){return '<tr class="'+(i===0&&!rows.tie?'lead':'')+'"><td class="tm"><span class="dot t-'+r.k+'"></span>'+TN[r.k]+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td dir="ltr">'+(r.gd>0?'+':'')+r.gd+'</td><td class="pts">'+r.pts+'</td></tr>'}).join('');
   var ml=S.matches.length?S.matches.slice().sort(function(a,b){return b.week-a.week}).map(function(m){
