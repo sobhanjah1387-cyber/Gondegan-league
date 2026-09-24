@@ -24,6 +24,23 @@ try{var u0=JSON.parse(ss.get('gl_ui')||'{}');for(var k in u0)UI[k]=u0[k];}catch(
 
 /* icons */
 var AV='<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="14.5" r="7.4"/><path d="M5 40c0-9.2 6.6-14.6 15-14.6S35 30.8 35 40z"/></svg>';
+function av(p){return p&&p.ph?'<img class="ph" alt="" src="'+p.ph+'">':AV}
+(function(){var st=document.createElement('style');st.textContent='.ph{width:100%;height:100%;object-fit:cover;display:block}.mini .ph{position:absolute;inset:0}.phb{position:relative;flex:none;width:48px;height:48px;display:block;cursor:pointer}.phb .mini{width:48px;height:48px}.phb .cam{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#2a1b00;display:grid;place-items:center;font-size:12px;border:2px solid var(--bg0)}.phb input{display:none}.pl-edit{align-items:center}.mini-bt.rm{color:#ff6b70}';document.head.appendChild(st)})();
+function readPoster(file,cb){
+  var url=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){var MW=900,MH=460,r=Math.min(MW/im.width,MH/im.height,1),w=Math.round(im.width*r),h=Math.round(im.height*r),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);URL.revokeObjectURL(url);cb(c.toDataURL('image/jpeg',0.82))};
+  im.onerror=function(){URL.revokeObjectURL(url);cb(null)};
+  im.src=url;
+}
+function toLocalInput(iso){if(!iso)return '';var d=new Date(iso);if(isNaN(d))return '';var l=new Date(d.getTime()-d.getTimezoneOffset()*60000);return l.toISOString().slice(0,16)}
+function fmtCd(ms){ms=Math.max(0,ms);var s=Math.floor(ms/1000),d=Math.floor(s/86400);s-=d*86400;var h=Math.floor(s/3600);s-=h*3600;var mi=Math.floor(s/60);s-=mi*60;var p2=function(n){return (n<10?'0':'')+n};return (d>0?d+' روز و ':'')+p2(h)+':'+p2(mi)+':'+p2(s)}
+function nextMatch(){var now=Date.now();return S.matches.filter(function(m){return m.dt&&new Date(m.dt).getTime()>now}).sort(function(a,b){return new Date(a.dt)-new Date(b.dt)})[0]||null}
+function readPhoto(file,cb){
+  var url=URL.createObjectURL(file),im=new Image();
+  im.onload=function(){var s=Math.min(im.width,im.height),sx=(im.width-s)/2,sy=im.height>im.width?(im.height-s)*0.2:(im.height-s)/2,N=160,c=document.createElement('canvas');c.width=c.height=N;c.getContext('2d').drawImage(im,sx,sy,s,s,0,0,N,N);URL.revokeObjectURL(url);cb(c.toDataURL('image/jpeg',0.82))};
+  im.onerror=function(){URL.revokeObjectURL(url);cb(null)};
+  im.src=url;
+}
 var BOOT='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 3.5h6.2v5.4c0 1.3 1 2.4 2.3 2.8l6 1.9c1.9.6 3.2 2 3.2 3.9v1.5H3.5z" fill="#fff" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/><path d="M10.6 6.2l2 .8M11.4 8.5l2 .8" stroke="#0b1220" stroke-width="1" stroke-linecap="round"/><path d="M6 19.2v2.3M10.2 19.2v2.3M14.6 19.2v2.3M19 19.2v2.3" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></svg>';
 var BALL='<span>⚽</span>';
 var IC={
@@ -79,6 +96,7 @@ function tbl(){
 /* ---------- views ---------- */
 function vLeague(){
   var rows=tbl(),R=rows.R;
+  var nm=nextMatch(),hero=nm?('<div class="card glass hero-next" id="heroNext"'+(nm.poster?' style="background-image:url(\''+nm.poster+'\')"':'')+'><div class="hn-ov"><span class="wk">هفته '+nm.week+'</span><h2>'+TN.tg+' <small>vs</small> '+TN.hs+'</h2><div class="cd" id="cdTxt">—</div></div></div>'):'';
   var adm=ADMIN?'<div class="bar"><button class="btn pri" data-act="newMatch">＋ ثبت نتیجه بازی</button><button class="btn dng" data-act="resetTable">ریست جدول</button></div>':'';
   var trs=rows.map(function(r,i){return '<tr class="'+(i===0&&!rows.tie?'lead':'')+'"><td class="tm"><span class="dot t-'+r.k+'"></span>'+TN[r.k]+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td dir="ltr">'+(r.gd>0?'+':'')+r.gd+'</td><td class="pts">'+r.pts+'</td></tr>'}).join('');
   var ml=S.matches.length?S.matches.slice().sort(function(a,b){return b.week-a.week}).map(function(m){
@@ -94,7 +112,7 @@ function vLeague(){
   else{cap='جام نزد «'+TN[rows[0].k]+'»';sub='اختلاف امتیاز: '+Math.abs(R.tg.pts-R.hs.pts)+' | تفاضل گل: '+Math.abs(R.tg.gd-R.hs.gd)}
   var cup='<svg viewBox="0 0 48 54" aria-hidden="true"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#f0b429"/><stop offset="1" stop-color="#b57a0c"/></linearGradient></defs><path d="M13 9H5c0 9 3.5 14 9 15M35 9h8c0 9-3.5 14-9 15" fill="none" stroke="#e0a82e" stroke-width="3" stroke-linecap="round"/><path d="M12 3h24v15a12 12 0 0 1-24 0z" fill="url(#cg)"/><path d="M24 8l2 4.2 4.6.6-3.3 3.2.8 4.5-4.1-2.2-4.1 2.2.8-4.5-3.3-3.2 4.6-.6z" fill="#fff6d6" opacity=".9"/><rect x="21" y="30" width="6" height="9" fill="#d99a12"/><rect x="14" y="39" width="20" height="6" rx="2" fill="#c98f1c"/><rect x="11" y="45" width="26" height="6" rx="2" fill="#94640c"/></svg>';
   var tro='<div class="card glass trophy"><div class="ch"><h2>جام قهرمانی</h2></div><div class="track"><div class="rail"></div><div class="end a"><i class="dot t-tg"></i><span>'+TN.tg+'</span></div><div class="end b"><i class="dot t-hs"></i><span>'+TN.hs+'</span></div><div class="cup" style="left:'+pos+'%">'+cup+'</div></div><div class="tcap">'+cap+'<small>'+sub+'</small></div></div>';
-  return adm+'<div class="card glass"><div class="ch"><h2>جدول لیگ</h2><small>امتیاز: برد ۳ | مساوی ۱</small></div><div class="tw"><table class="lt"><thead><tr><th class="tm">تیم</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>'+trs+'</tbody></table></div></div>'
+  return hero+adm+'<div class="card glass"><div class="ch"><h2>جدول لیگ</h2><small>امتیاز: برد ۳ | مساوی ۱</small></div><div class="tw"><table class="lt"><thead><tr><th class="tm">تیم</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>'+trs+'</tbody></table></div></div>'
     +'<div class="card glass"><div class="ch"><h2>نتایج بازی‌ها</h2></div>'+ml+'</div>'+pun+tro;
 }
 
@@ -115,7 +133,7 @@ function vStats(){
   var chips='<div class="chips">'+STAT_TABS.map(function(t){return '<button class="chip '+(UI.stat===t[0]?'on':'')+'" data-act="stat" data-v="'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div>';
   var adm=ADMIN?'<div class="bar"><button class="btn pri" data-act="editStats">ویرایش آمار</button><button class="btn dng" data-act="resetStats">ریست آمار</button></div>':'';
   var rows=L.map(function(x,i){var v=D.v(x),c=x.p.t==='tg'?'var(--red)':'var(--blue)';
-    return '<div class="lr '+(i===0&&v>0?'top':'')+'"><span class="rk">'+(i+1)+'</span><span class="mini '+x.p.t+'">'+AV+'</span><div class="lm"><b>'+esc(x.p.name)+(i===0&&v>0&&UI.stat==='mvp'?' 👑':'')+'</b><small>'+TN[x.p.t]+'</small><div class="b"><i style="width:'+(v/max*100)+'%;--c:'+c+'"></i></div></div><div class="lv">'+(v>0||UI.stat==='rating'?D.show(x):'<small>—</small>')+'</div></div>'}).join('');
+    return '<div class="lr '+(i===0&&v>0?'top':'')+'"><span class="rk">'+(i+1)+'</span><span class="mini '+x.p.t+'">'+av(x.p)+'</span><div class="lm"><b>'+esc(x.p.name)+(i===0&&v>0&&UI.stat==='mvp'?' 👑':'')+'</b><small>'+TN[x.p.t]+'</small><div class="b"><i style="width:'+(v/max*100)+'%;--c:'+c+'"></i></div></div><div class="lv">'+(v>0||UI.stat==='rating'?D.show(x):'<small>—</small>')+'</div></div>'}).join('');
   var title=STAT_TABS.filter(function(t){return t[0]===UI.stat})[0][1];
   return adm+chips+'<div class="card glass"><div class="ch"><h2>'+title+'</h2></div><small>'+D.sub+'</small><div style="margin-top:6px">'+rows+'</div></div>'
    +(UI.stat==='rating'?legend(true):'');
@@ -136,11 +154,11 @@ function badges(s,align){
 function vsCell(p,m,side){
   if(!p)return '<div></div>';
   var s=peek(m.id,p.id),mv=S.mvp[m.id]===p.id;
-  return '<button class="vc '+side+'" data-act="pl" data-id="'+p.id+'"><span class="mini '+side+'">'+AV+'</span><span class="tx"><span class="nm">'+esc(p.name)+(mv?' 👑':'')+'</span><span class="ic">'+(badges(s)||'<small>—</small>')+'</span></span></button>';
+  return '<button class="vc '+side+'" data-act="pl" data-id="'+p.id+'"><span class="mini '+side+'">'+av(p)+'</span><span class="tx"><span class="nm">'+esc(p.name)+(mv?' 👑':'')+'</span><span class="ic">'+(badges(s)||'<small>—</small>')+'</span></span></button>';
 }
 function node(p,i,m){
   var s=peek(m.id,p.id),sl=SLOTS[i],mv=S.mvp[m.id]===p.id;
-  return '<button class="pn" style="left:'+sl.x+'%;top:'+sl.y+'%" data-act="pl" data-id="'+p.id+'"><span class="circ '+p.t+'"><span class="av">'+AV+'</span>'
+  return '<button class="pn" style="left:'+sl.x+'%;top:'+sl.y+'%" data-act="pl" data-id="'+p.id+'"><span class="circ '+p.t+'"><span class="av">'+av(p)+'</span>'
    +'<span class="rt">'+(s.r!=null?rb(s.r):(ADMIN?'<span class="add">＋</span>':''))+'</span>'
    +(s.a?'<span class="sh">'+reps(s.a,BOOT,3)+'</span>':'')+(s.g?'<span class="gl">'+reps(s.g,BALL,3)+'</span>':'')
    +(mv?'<span class="mv">👑</span>':'')+'</span><span class="nm">'+esc(p.name)+'</span></button>';
@@ -230,6 +248,14 @@ function persistUI(){UI.scroll=window.scrollY||0;ss.set('gl_ui',JSON.stringify(U
 var si=0,stimer=null;
 function slideTo(i){var s=$$('.slide'),d=$$('.dots i');si=(i+s.length)%s.length;s.forEach(function(e,k){e.classList.toggle('on',k===si)});d.forEach(function(e,k){e.classList.toggle('on',k===si)});startSlide()}
 function startSlide(){clearInterval(stimer);stimer=setInterval(function(){slideTo(si+1)},7000)}
+function tickCountdown(){
+  var now=Date.now(),changed=false;
+  S.matches.forEach(function(m){if(m.dt&&m.poster&&new Date(m.dt).getTime()<=now){delete m.poster;changed=true}});
+  if(changed){touch();render();return}
+  var m=nextMatch(),el=$('#cdTxt');
+  if(!m||!el)return;
+  el.textContent=fmtCd(new Date(m.dt).getTime()-now);
+}
 function bindSwipe(){var h=$('#hero'),x0=null;h.addEventListener('touchstart',function(e){x0=e.touches[0].clientX},{passive:true});h.addEventListener('touchend',function(e){if(x0==null)return;var dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>40)slideTo(si+(dx<0?1:-1))},{passive:true})}
 
 /* ---------- sheets ---------- */
@@ -245,7 +271,7 @@ var head=function(title,sub){return '<div class="sh-head"><div class="t"><b>'+ti
 function plSheet(){
   var p=pl(SH.id),m=curM();if(!p||!m){closeSheet();return ''}
   var s=peek(m.id,p.id),A=agg()[p.id],mv=S.mvp[m.id]===p.id;
-  var h='<div class="sh-head"><span class="mini '+p.t+'">'+AV+'</span><div class="t"><b>'+esc(p.name)+'</b><small>'+TN[p.t]+' | هفته '+m.week+'</small></div><button class="x" data-act="closeSheet" aria-label="بستن">✕</button></div>';
+  var h='<div class="sh-head"><span class="mini '+p.t+'">'+av(p)+'</span><div class="t"><b>'+esc(p.name)+'</b><small>'+TN[p.t]+' | هفته '+m.week+'</small></div><button class="x" data-act="closeSheet" aria-label="بستن">✕</button></div>';
   if(ADMIN){
     h+='<div class="row"><span class="lb">نمره این بازی '+(s.r!=null?rb(s.r):'')+'</span><div class="stp"><button data-act="r-" aria-label="کم">−</button><input id="rIn" inputmode="decimal" placeholder="—" value="'+(s.r==null?'':f1(s.r))+'"><button data-act="r+" aria-label="زیاد">+</button></div></div>'
      +(s.r!=null?'<div style="text-align:left;margin:-4px 0 6px"><button class="btn sm dng" data-act="rClear">پاک کردن نمره</button></div>':'')
@@ -266,19 +292,24 @@ function editStatsSheet(){
   return head('ویرایش آمار','نمره ۱ تا ۱۰ | تغییرات همان لحظه اعمال می‌شود')+chips+blk('tg')+blk('hs')+'<button class="btn pri wide" style="margin-top:16px" data-act="closeSheet">تمام</button>';
 }
 function managePlSheet(){
-  var blk=function(t){var ps=tp(t);return '<div class="tl"><i class="dot '+t+'"></i>'+TN[t]+' ('+ps.length+' از ۵)</div>'+ps.map(function(p){return '<div class="pl-edit"><input class="in" data-pn="'+p.id+'" value="'+esc(p.name)+'" maxlength="24"><button class="mini-bt" data-act="rmPl" data-id="'+p.id+'" aria-label="حذف">✕</button></div>'}).join('')+(ps.length<5?'<button class="btn sm" data-act="addPl" data-t="'+t+'">＋ افزودن بازیکن</button>':'')};
+  var blk=function(t){var ps=tp(t);return '<div class="tl"><i class="dot '+t+'"></i>'+TN[t]+' ('+ps.length+' از ۵)</div>'+ps.map(function(p){return '<div class="pl-edit"><label class="phb" title="عکس بازیکن"><span class="mini '+t+'">'+av(p)+'</span><span class="cam">📷</span><input type="file" accept="image/*" data-ph="'+p.id+'"></label><input class="in" data-pn="'+p.id+'" value="'+esc(p.name)+'" maxlength="24">'+(p.ph?'<button class="mini-bt rm" data-act="rmPh" data-id="'+p.id+'" aria-label="حذف عکس">🗑</button>':'')+'<button class="mini-bt" data-act="rmPl" data-id="'+p.id+'" aria-label="حذف بازیکن">✕</button></div>'}).join('')+(ps.length<5?'<button class="btn sm" data-act="addPl" data-t="'+t+'">＋ افزودن بازیکن</button>':'')};
   return head('مدیریت بازیکنان','حداکثر ۵ بازیکن برای هر تیم (فوتسال)')+blk('tg')+blk('hs')+'<button class="btn pri wide" style="margin-top:16px" data-act="closeSheet">تمام</button>';
 }
 function matchSheet(id){
   var m=id?S.matches.filter(function(x){return x.id===id})[0]:null;
   var wk=m?m.week:(S.matches.reduce(function(a,b){return Math.max(a,b.week)},0)+1);
+  var poster=posterDraft!==undefined?posterDraft:(m&&m.poster);
   return head(m?'ویرایش بازی':'ثبت بازی جدید')
    +'<div class="two"><label class="fld"><span>هفته</span><input class="in" id="mw" inputmode="numeric" value="'+wk+'"></label><label class="fld"><span>تاریخ (اختیاری)</span><input class="in" id="md" value="'+esc(m?m.date:'')+'" placeholder="مثلاً ۱۴۰۵/۰۷/۰۳"></label></div>'
    +'<div class="two"><label class="fld"><span style="color:var(--red)">گل '+TN.tg+'</span><input class="in" id="ma" inputmode="numeric" value="'+(m&&m.res?m.res.tg:'')+'" placeholder="—"></label><label class="fld"><span style="color:var(--blue)">گل '+TN.hs+'</span><input class="in" id="mb" inputmode="numeric" value="'+(m&&m.res?m.res.hs:'')+'" placeholder="—"></label></div>'
    +'<p class="sm-t" style="margin:-4px 0 12px">اگر بازی هنوز برگزار نشده، نتیجه را خالی بگذارید.</p>'
    +(m?'<button class="btn sm wide" style="margin-bottom:10px" data-act="fillGoals" data-id="'+m.id+'">پر کردن نتیجه از گل‌های ثبت‌شده در Lineup</button>':'')
+   +'<label class="fld"><span>تاریخ و ساعت دقیق بازی (برای شمارش معکوس)</span><input class="in" id="mdt" type="datetime-local" value="'+(dtDraft!==undefined?dtDraft:toLocalInput(m&&m.dt))+'"></label>'
+   +'<label class="fld"><span>پوستر این بازی</span><label class="phb" style="width:100%;height:110px;border-radius:16px;overflow:hidden;display:block;background:var(--field);border:1px solid var(--line)">'+(poster?'<img class="ph" src="'+poster+'" alt="" style="width:100%;height:100%">':'<span style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink2);font-size:12px">افزودن پوستر</span>')+'<span class="cam">📷</span><input type="file" accept="image/*" data-poster="1"></label></label>'
+   +(poster?'<button class="btn sm" style="margin:-6px 0 12px" data-act="rmPoster">حذف پوستر</button>':'')
    +'<div class="two"><button class="btn pri" data-act="saveMatch" data-id="'+(m?m.id:'')+'">ذخیره</button>'+(m?'<button class="btn dng" data-act="delMatch" data-id="'+m.id+'">حذف بازی</button>':'<button class="btn" data-act="closeSheet">انصراف</button>')+'</div>';
 }
+var posterDraft,dtDraft;
 function newsSheet(id){
   var n=id?S.news.filter(function(x){return x.id===id})[0]:null;
   var wk=n?n.week:((curM()||{}).week||1);
@@ -317,7 +348,7 @@ function save(){
   }).catch(function(e){
     saving=false;
     if(e&&e.code==='auth'){toast('رمز مدیر معتبر نیست. دوباره وارد شوید.')}
-    else{blocked=true;blockMsg=(e&&e.status===503)?'ذخیره‌ساز سرور (Upstash Redis) هنوز به پروژه وصل نشده است. راهنمای README را ببینید.':'ارتباط با سرور برقرار نشد. تغییرات روی همین دستگاه نگه داشته شد.'}
+    else{blocked=true;blockMsg=(e&&e.status===503)?'ذخیره‌ساز KV هنوز به پروژه وصل نشده است. راهنمای README را ببینید.':'ارتباط با سرور برقرار نشد. تغییرات روی همین دستگاه نگه داشته شد.'}
     saveUI();
   });
 }
@@ -328,7 +359,7 @@ function load(first){
     var remote=j.state;
     if(remote&&remote.players&&!dirty&&(first||remote.rev!==S.rev)){S=remote;render()}
     if(first&&ADMIN){try{var D=JSON.parse(ls.get('gl_draft')||'null');if(D&&D.players&&D.rev>(remote&&remote.rev||0)){S=D;dirty=true;render();kick()}}catch(e){}}
-    if(!STORAGE&&ADMIN){blocked=true;blockMsg='ذخیره‌ساز سرور (Upstash Redis) هنوز به پروژه وصل نشده است. راهنمای README را ببینید.'}
+    if(!STORAGE&&ADMIN){blocked=true;blockMsg='ذخیره‌ساز KV هنوز به پروژه وصل نشده است. راهنمای README را ببینید.'}
     saveUI();
   },function(){
     if(!first)return;
@@ -358,13 +389,16 @@ var A={
  logout:function(){ADMIN=false;PW='';ls.del('gl_pw');closeSheet();renderTop();render();saveUI();toast('از حالت مدیر خارج شدید')},
  saveNow:function(){blocked=false;save()},
  /* league */
- newMatch:function(){if(!ADMIN)return;openSheet(matchSheet(null),{type:'match'})},
- editMatch:function(el){if(!ADMIN)return;openSheet(matchSheet(el.dataset.id),{type:'match'})},
+ newMatch:function(){if(!ADMIN)return;posterDraft=undefined;dtDraft=undefined;openSheet(matchSheet(null),{type:'match',id:null})},
+ editMatch:function(el){if(!ADMIN)return;posterDraft=undefined;dtDraft=undefined;openSheet(matchSheet(el.dataset.id),{type:'match',id:el.dataset.id})},
  saveMatch:function(el){if(!ADMIN)return;var id=el.dataset.id,week=parseInt($('#mw').value,10)||1,date=$('#md').value.trim(),a=$('#ma').value.trim(),b=$('#mb').value.trim(),res=null;
    if(a!==''&&b!==''){res={tg:Math.max(0,parseInt(a,10)||0),hs:Math.max(0,parseInt(b,10)||0)}}
-   if(id){var m=S.matches.filter(function(x){return x.id===id})[0];m.week=week;m.date=date;m.res=res}
-   else{var n={id:uid('m'),week:week,date:date,res:res};S.matches.push(n);UI.mid=n.id}
-   S.matches.sort(function(x,y){return x.week-y.week});touch();closeSheet();render();toast('بازی ذخیره شد')},
+   var dtVal=dtDraft!==undefined?dtDraft:$('#mdt').value,dt='';if(dtVal){var dd=new Date(dtVal);if(!isNaN(dd))dt=dd.toISOString()}
+   var poster=posterDraft!==undefined?posterDraft:null;
+   if(id){var m=S.matches.filter(function(x){return x.id===id})[0];m.week=week;m.date=date;m.res=res;m.dt=dt;if(posterDraft!==undefined)m.poster=poster}
+   else{var n={id:uid('m'),week:week,date:date,res:res,dt:dt,poster:poster||null};S.matches.push(n);UI.mid=n.id}
+   S.matches.sort(function(x,y){return x.week-y.week});posterDraft=undefined;dtDraft=undefined;touch();closeSheet();render();toast('بازی ذخیره شد')},
+ rmPoster:function(){posterDraft=null;setSheet(matchSheet(SH&&SH.id))},
  fillGoals:function(el){var id=el.dataset.id,g={tg:0,hs:0},st=S.ms[id]||{};for(var k in st){var p=pl(k);if(p)g[p.t]+=st[k].g||0}$('#ma').value=g.tg;$('#mb').value=g.hs},
  delMatch:function(el){var id=el.dataset.id;ask('این بازی همراه با آمار Lineup آن حذف شود؟','حذف بازی',function(){S.matches=S.matches.filter(function(x){return x.id!==id});delete S.ms[id];delete S.mvp[id];if(UI.mid===id)UI.mid=null;touch();render();toast('بازی حذف شد')})},
  resetTable:function(){ask('نتیجه همه بازی‌ها پاک شود و جدول صفر شود؟','ریست جدول',function(){S.matches.forEach(function(m){m.res=null});touch();render();toast('جدول ریست شد')})},
@@ -392,6 +426,7 @@ var A={
      touch();render();toast('ریست شد')})},
  managePl:function(){if(!ADMIN)return;openSheet(managePlSheet(),{type:'mp'})},
  addPl:function(el){var t=el.dataset.t;if(tp(t).length>=5)return;var n=tp(t).length+1;S.players.push({id:uid('p'),t:t,name:'بازیکن '+n});touch();setSheet(managePlSheet());render()},
+ rmPh:function(el){var p=pl(el.dataset.id);if(!p)return;delete p.ph;touch();setSheet(managePlSheet());render()},
  rmPl:function(el){var id=el.dataset.id,p=pl(id);if(tp(p.t).length<=1){toast('هر تیم حداقل یک بازیکن نیاز دارد');return}
    ask('«'+esc(p.name)+'» و آمارش حذف شود؟','حذف',function(){S.players=S.players.filter(function(x){return x.id!==id});for(var m in S.ms)delete S.ms[m][id];for(var k in S.mvp)if(S.mvp[k]===id)delete S.mvp[k];touch();openSheet(managePlSheet(),{type:'mp'});render()})},
  /* news */
@@ -416,14 +451,19 @@ document.addEventListener('input',function(e){var t=e.target;if(!ADMIN)return;
   if(t.id==='rIn'&&SH&&SH.id){var v=parseFloat(String(t.value).replace(',','.').replace(/[۰-۹]/g,function(d){return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)}));setStat(SH.id,'r',isNaN(v)?null:v);touch();render();return}
   if(t.dataset&&t.dataset.f){var f=t.dataset.f,raw=String(t.value).replace(',','.'),v2=parseFloat(raw);if(f==='r')setStat(t.dataset.p,'r',isNaN(v2)?null:v2);else setStat(t.dataset.p,f,isNaN(v2)?0:v2);touch();render();return}
   if(t.dataset&&t.dataset.pn){var p=pl(t.dataset.pn);if(p){p.name=t.value.slice(0,24)||p.name;touch();render()}}
+  if(t.id==='mdt'){dtDraft=t.value}
 });
-document.addEventListener('change',function(e){var t=e.target;if(t.id==='rIn'&&SH&&SH.id){var s=peek(curM().id,SH.id);t.value=s.r==null?'':f1(s.r);setSheet(plSheet())}});
+document.addEventListener('change',function(e){var t=e.target;
+  if(t.dataset&&t.dataset.poster==='1'&&t.files&&t.files[0]&&ADMIN){var mid=SH&&SH.id;readPoster(t.files[0],function(d){if(!d){toast('این عکس قابل استفاده نیست. عکس JPG یا PNG انتخاب کنید.');return}posterDraft=d;setSheet(matchSheet(mid))});return}
+  if(t.dataset&&t.dataset.ph&&t.files&&t.files[0]&&ADMIN){var pid=t.dataset.ph,file=t.files[0];readPhoto(file,function(d){var p=pl(pid);if(!d||!p){toast('این عکس قابل استفاده نیست. عکس JPG یا PNG انتخاب کنید.');return}p.ph=d;touch();setSheet(managePlSheet());render();toast('عکس بازیکن ذخیره شد')});return}
+  if(t.id==='rIn'&&SH&&SH.id){var s=peek(curM().id,SH.id);t.value=s.r==null?'':f1(s.r);setSheet(plSheet())}});
 document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='pw')A.login();if(e.key==='Escape'&&SH)closeSheet()});
 window.addEventListener('scroll',function(){clearTimeout(window.__sc);window.__sc=setTimeout(persistUI,300)},{passive:true});
 window.addEventListener('beforeunload',function(){persistUI()});
 
 /* init */
 buildShell();renderTop();render();startSlide();bindSwipe();saveUI();
+setInterval(tickCountdown,1000);
 if(UI.scroll)setTimeout(function(){window.scrollTo(0,UI.scroll)},60);
 load(true);
 setInterval(function(){if(document.hidden||SH||dirty||saving||!API)return;load(false)},30000);
